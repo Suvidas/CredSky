@@ -1,15 +1,6 @@
-# Secrets — never commit the real key
 .env
-.env.local
-.env.*.local
-
-# Vercel
-.vercel
-
-# Dependencies
+.env.*
+!.env.example
+dist/
 node_modules/
-
-# Misc
-*.log
-.DS_Store
-Thumbs.db
+.vercel/

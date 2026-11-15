@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What's the Weather</title>
+  <meta name="description" content="Check the sky's credit score before you step out. Live current weather for any city, with a plain-language verdict.">
+  <meta name="theme-color" content="#0f2a4a">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='24' cy='26' r='12' fill='%23ffb547'/%3E%3Cpath d='M20 50h28a11 11 0 0 0 0-22 15 15 0 0 0-28 4 9 9 0 0 0 0 18z' fill='%23ffffff' stroke='%230f2a4a' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.weatherapi.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body data-daypart="day" data-tone="neutral">
+  <a class="skip-link" href="#results">Skip to weather</a>
+  <div class="sky" aria-hidden="true"></div>
+
+  <div class="app">
+    <header class="masthead">
+      <div class="brand">
+        <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <circle cx="24" cy="26" r="12" fill="var(--sun)"/>
+          <path d="M20 50h28a11 11 0 0 0 0-22 15 15 0 0 0-28 4 9 9 0 0 0 0 18z" fill="#fff" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <div>
+          <h1 class="brand__name">What's the Weather</h1>
+          <p class="brand__tagline">Check the sky's credit score before you step out.</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="search-panel" aria-label="Find a city">
+      <form id="search-form" class="search" role="search" novalidate>
+        <label for="city-input" class="search__label">Search any city</label>
+        <div class="search__row">
+          <div class="search__field">
+            <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <input id="city-input" name="city" type="text" inputmode="search" autocomplete="off" autocapitalize="words" spellcheck="false"
+                   placeholder="e.g. Delhi, London, Tokyo" aria-describedby="search-error">
+          </div>
+          <button type="submit" class="btn btn--primary" id="search-btn">Search</button>
+        </div>
+        <p id="search-error" class="search__error" aria-live="assertive"></p>
+      </form>
+
+      <div class="chips">
+        <h2 class="chips__label" id="popular-label">Popular cities</h2>
+        <ul class="chips__list" id="city-chips" aria-labelledby="popular-label"></ul>
+      </div>
+    </section>
+
+    <p id="sr-status" class="visually-hidden" role="status" aria-live="polite"></p>
+
+    <main id="results" class="results" tabindex="-1" aria-busy="true">
+      <!-- Loading state -->
+      <section id="view-loading" class="view view--loading" aria-label="Loading weather">
+        <div class="loading-card card">
+          <span class="spinner" aria-hidden="true"></span>
+          <div>
+            <p class="loading-card__title" id="loading-title">Fetching live weather…</p>
+            <p class="loading-card__sub" id="loading-sub">Asking WeatherAPI for the latest conditions.</p>
+          </div>
+        </div>
+        <div class="skeleton-grid" aria-hidden="true">
+          <div class="skeleton skeleton--hero"></div>
+          <div class="skeleton skeleton--hero"></div>
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+      </section>
+
+      <!-- Error state -->
+      <section id="view-error" class="view view--error" aria-labelledby="error-title" hidden>
+        <div class="card error-card">
+          <div class="error-card__icon" id="error-icon" aria-hidden="true">!</div>
+          <h2 class="error-card__title" id="error-title">Something went wrong</h2>
+          <p class="error-card__msg" id="error-message"></p>
+          <div class="error-card__actions">
+            <button type="button" class="btn btn--primary" id="retry-btn">Retry</button>
+            <button type="button" class="btn btn--ghost" id="restore-btn" hidden>Show last result</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Success state -->
+      <div id="view-data" class="view view--data" hidden>
+        <div class="top-grid">
+          <article class="card current" aria-labelledby="loc-name">
+            <div class="current__head">
+              <div class="current__where">
+                <p class="eyebrow">Current weather</p>
+                <h2 class="current__city" id="loc-name"></h2>
+                <p class="current__place" id="loc-place"></p>
+              </div>
+              <div class="current__time">
+                <p class="eyebrow">Local time</p>
+                <time class="current__clock" id="local-time"></time>
+                <p class="current__tz" id="local-tz"></p>
+              </div>
+            </div>
+            <div class="current__body">
+              <img class="current__icon" id="cond-icon" src="data:," alt="" width="128" height="128">
+              <div class="current__reading">
+                <p class="temp"><span id="temp-c"></span><span class="temp__unit">°C</span></p>
+                <p class="current__condition" id="cond-text"></p>
+                <p class="current__feels">Feels like <span id="feels-c"></span>°C</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card verdict" id="verdict" aria-labelledby="verdict-title">
+            <div class="verdict__top">
+              <p class="eyebrow">Today's sky verdict</p>
+              <span class="verdict__badge" id="verdict-badge"></span>
+            </div>
+            <div class="verdict__emoji" id="verdict-emoji" aria-hidden="true"></div>
+            <h2 class="verdict__title" id="verdict-title"></h2>
+            <p class="verdict__desc" id="verdict-desc"></p>
+            <p class="verdict__basis" id="verdict-basis"></p>
+            <p class="verdict__note">App-generated interpretation, not a real credit score.</p>
+          </article>
+        </div>
+
+        <section class="metrics" aria-label="Key metrics">
+          <article class="card metric">
+            <p class="metric__label">Humidity</p>
+            <p class="metric__value"><span id="m-humidity"></span><span class="metric__unit">%</span></p>
+            <div class="meter" aria-hidden="true"><span id="m-humidity-bar"></span></div>
+          </article>
+          <article class="card metric">
+            <p class="metric__label">Wind</p>
+            <p class="metric__value"><span id="m-wind"></span><span class="metric__unit">km/h</span></p>
+            <p class="metric__sub" id="m-wind-sub"></p>
+          </article>
+          <article class="card metric">
+            <p class="metric__label">UV index</p>
+            <p class="metric__value"><span id="m-uv"></span><span class="metric__unit">index</span></p>
+            <p class="metric__sub" id="m-uv-sub"></p>
+          </article>
+        </section>
+
+        <section class="card details" aria-labelledby="details-title">
+          <h2 class="section-title" id="details-title">More details</h2>
+          <dl class="details__list">
+            <div><dt>Cloud coverage</dt><dd><span id="d-cloud"></span>%</dd></div>
+            <div><dt>Visibility</dt><dd><span id="d-vis"></span> km</dd></div>
+            <div><dt>Pressure</dt><dd><span id="d-pressure"></span> mb</dd></div>
+            <div><dt>Wind speed</dt><dd><span id="d-wind"></span> km/h</dd></div>
+            <div><dt>Temperature</dt><dd><span id="d-temp-f"></span> °F</dd></div>
+            <div><dt>Last updated</dt><dd id="d-updated"></dd></div>
+          </dl>
+        </section>
+
+        <section class="card json" aria-labelledby="json-title">
+          <div class="json__head">
+            <div>
+              <h2 class="section-title" id="json-title">API response</h2>
+              <p class="json__meta" id="json-meta"></p>
+            </div>
+            <div class="json__controls">
+              <div class="tabs" role="tablist" aria-label="JSON view">
+                <button type="button" role="tab" class="tab" id="tab-formatted" aria-selected="true" aria-controls="json-panel">Formatted</button>
+                <button type="button" role="tab" class="tab" id="tab-raw" aria-selected="false" aria-controls="json-panel" tabindex="-1">Raw</button>
+              </div>
+              <button type="button" class="btn btn--ghost btn--small" id="copy-btn">Copy</button>
+            </div>
+          </div>
+          <pre class="json__output" id="json-panel" role="tabpanel" aria-labelledby="tab-formatted" tabindex="0"><code id="json-code"></code></pre>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>Live data from <a href="https://www.weatherapi.com/" rel="noopener" target="_blank">WeatherAPI.com</a>. The sky verdict is generated by this app from temperature, condition and wind.</p>
+    </footer>
+  </div>
+</body>
+</html>

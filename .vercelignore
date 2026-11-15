@@ -1,7 +1,4 @@
-# Keep secrets and local artifacts out of Vercel CLI uploads
 .env
 .env.*
 dist
 node_modules
-tests
-.github

@@ -2,14 +2,10 @@
   "name": "whats-the-weather",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
-  "description": "What’s the Weather — a CRED-inspired current-conditions dashboard powered by WeatherAPI.com.",
+  "description": "Check the sky's credit score before you step out.",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js",
-    "test": "node --test \"tests/*.test.js\""
+    "build": "node build.js",
+    "dev": "node dev.js"
   },
-  "engines": {
-    "node": ">=20"
-  }
+  "engines": { "node": ">=18" }
 }
