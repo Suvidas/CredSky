@@ -84,8 +84,9 @@ vercel env add WEATHER_API_KEY production   # paste the WeatherAPI.com key
 vercel deploy --prod
 ```
 
-On push to `main`, the GitHub Action in `.github/workflows/deploy.yml` redeploys
-automatically (needs `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` repo secrets).
+When the project's Git Integration is connected to this GitHub repository,
+Vercel deploys every push to `main` automatically. A CI-driven alternative
+(with tests before deploy) lives in [`docs/deploy-workflow.example.yml`](docs/deploy-workflow.example.yml).
 
 ## Data sources
 
