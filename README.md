@@ -11,7 +11,7 @@ from [WeatherAPI.com](https://www.weatherapi.com/) through a serverless proxy.
 
 | Where | How |
 | --- | --- |
-| **Production (Vercel)** | deployed from this repo — URL shown in the deployment |
+| **Production (Vercel)** | **https://credsky-gamma.vercel.app** — auto-deployed from this repo |
 | **Local dev** | `npm install` *(no dependencies — optional)*, then `npm run dev` → http://localhost:3000 |
 | **Unit tests** | `npm test` |
 
